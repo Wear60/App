@@ -73,7 +73,9 @@ export const confirmOrder = async (req, reply) => {
             latitude:deliveryPersonLocation?.latitude,
             longitude:deliveryPersonLocation?.longitude,
             address:deliveryPersonLocation.address || "No address available"
-        }
+        };
+
+        req.server.io.to(orderId).emit("orderConfirmed", order);
 
         await order.save();
         return reply.status(200).send(order);
@@ -111,6 +113,9 @@ export const updateOrderStatus = async (req, reply) => {
         order.status = status;
         order.deliveryPersonLocation = deliveryPersonLocation
         await order.save();
+
+        req.server.io.to(orderId).emit("liveTrackingUpdares", order);
+
         return reply.status(200).send(order);
 
     } catch (error) {
